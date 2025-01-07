@@ -9,9 +9,9 @@ export const processCsvFile = async (file: File): Promise<string[]> => {
     reader.onload = async (event) => {
       try {
         const text = event.target?.result as string;
-        // Split by newline and filter out empty lines and whitespace
+        // Split by commas and filter out empty codes and whitespace
         const codes = text
-          .split('\n')
+          .split(',')
           .map(code => code.trim())
           .filter(Boolean);
 

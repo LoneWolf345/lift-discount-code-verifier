@@ -70,7 +70,7 @@ const DropZone = ({ onFileSelect }: DropZoneProps) => {
         Drag and drop your CSV file here, or click to select
       </p>
       <p className="mt-1 text-xs text-gray-500">
-        File should contain one discount code per line
+        File should contain comma-separated discount codes (e.g., CODE1,CODE2,CODE3)
       </p>
     </div>
   );
