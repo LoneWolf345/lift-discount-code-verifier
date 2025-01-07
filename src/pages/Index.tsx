@@ -8,9 +8,14 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Discount Code Verifier</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Sparklight Government Assistance Discount Code Verifier</h1>
         
         <div className="space-y-8">
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Verify Code</h2>
+            <CodeVerifier codes={codes} />
+          </div>
+
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Upload Codes</h2>
             <CsvUploader onCodesLoaded={setCodes} />
@@ -19,11 +24,6 @@ const Index = () => {
                 {codes.length} codes loaded
               </p>
             )}
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Verify Code</h2>
-            <CodeVerifier codes={codes} />
           </div>
         </div>
       </div>
