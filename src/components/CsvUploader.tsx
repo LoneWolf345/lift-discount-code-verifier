@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Upload } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CsvUploaderProps {
   onCodesLoaded: (codes: string[]) => void;
@@ -10,14 +11,32 @@ const CsvUploader = ({ onCodesLoaded }: CsvUploaderProps) => {
   const { toast } = useToast();
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleFileUpload = (file: File) => {
+  const handleFileUpload = async (file: File) => {
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const text = event.target?.result as string;
         const codes = text.split('\n').map(code => code.trim()).filter(Boolean);
+        
+        console.log('Processing discount codes:', codes);
+
+        // Store codes in Supabase
+        const { error } = await supabase
+          .from('discount_codes')
+          .insert(codes.map(code => ({ code })));
+
+        if (error) {
+          console.error('Error storing codes:', error);
+          toast({
+            title: "Error",
+            description: "Failed to store discount codes",
+            variant: "destructive",
+          });
+          return;
+        }
+
         onCodesLoaded(codes);
-        console.log('Loaded discount codes:', codes);
+        console.log('Successfully stored discount codes');
         toast({
           title: "Success",
           description: `Loaded ${codes.length} discount codes`,

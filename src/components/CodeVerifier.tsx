@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Search } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CodeVerifierProps {
   codes: string[];
@@ -12,11 +13,26 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
   const [code, setCode] = useState('');
   const { toast } = useToast();
 
-  const verifyCode = () => {
+  const verifyCode = async () => {
     console.log('Verifying code:', code);
-    const isValid = codes.includes(code.trim());
     
-    if (isValid) {
+    const { data, error } = await supabase
+      .from('discount_codes')
+      .select('code')
+      .eq('code', code.trim())
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error verifying code:', error);
+      toast({
+        title: "Error",
+        description: "Failed to verify discount code",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (data) {
       toast({
         title: "Valid Code",
         description: "This discount code is valid!",
