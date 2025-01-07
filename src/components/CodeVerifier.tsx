@@ -13,6 +13,26 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
   const [code, setCode] = useState('');
   const { toast } = useToast();
 
+  const formatCode = (input: string) => {
+    // Remove any existing dashes and convert to uppercase
+    const cleanCode = input.replace(/-/g, '').toUpperCase();
+    
+    // If we have 3 or more characters, insert dash after the third character
+    if (cleanCode.length >= 3) {
+      return `${cleanCode.slice(0, 3)}-${cleanCode.slice(3, 6)}`;
+    }
+    
+    return cleanCode;
+  };
+
+  const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedCode = formatCode(e.target.value);
+    // Only update if the code is 7 or fewer characters (including dash)
+    if (formattedCode.length <= 7) {
+      setCode(formattedCode);
+    }
+  };
+
   const verifyCode = async () => {
     console.log('Verifying code:', code);
     
@@ -53,8 +73,9 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
         type="text"
         placeholder="Enter discount code"
         value={code}
-        onChange={(e) => setCode(e.target.value)}
+        onChange={handleCodeChange}
         className="flex-1"
+        maxLength={7}
       />
       <Button onClick={verifyCode} className="bg-primary hover:bg-primary/90">
         <Search className="h-4 w-4 mr-2" />
