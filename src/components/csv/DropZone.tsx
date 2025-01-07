@@ -10,6 +10,19 @@ const DropZone = ({ onFileSelect }: DropZoneProps) => {
   const { toast } = useToast();
   const [isDragging, setIsDragging] = useState(false);
 
+  const validateFile = (file: File) => {
+    // Check if it's a text file (CSV or TXT)
+    if (file.type && !['text/csv', 'text/plain'].includes(file.type)) {
+      toast({
+        title: "Error",
+        description: "Please upload a CSV or text file",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -24,14 +37,15 @@ const DropZone = ({ onFileSelect }: DropZoneProps) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file && file.type === 'text/csv') {
+    if (file && validateFile(file)) {
       onFileSelect(file);
-    } else {
-      toast({
-        title: "Error",
-        description: "Please upload a CSV file",
-        variant: "destructive",
-      });
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && validateFile(file)) {
+      onFileSelect(file);
     }
   };
 
@@ -47,16 +61,16 @@ const DropZone = ({ onFileSelect }: DropZoneProps) => {
       <input
         id="fileInput"
         type="file"
-        accept=".csv"
+        accept=".csv,.txt"
         className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) onFileSelect(file);
-        }}
+        onChange={handleFileInput}
       />
       <Upload className="mx-auto h-12 w-12 text-gray-400" />
       <p className="mt-2 text-sm text-gray-600">
         Drag and drop your CSV file here, or click to select
+      </p>
+      <p className="mt-1 text-xs text-gray-500">
+        File should contain one discount code per line
       </p>
     </div>
   );
