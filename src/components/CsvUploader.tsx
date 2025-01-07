@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Upload } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 interface CsvUploaderProps {
