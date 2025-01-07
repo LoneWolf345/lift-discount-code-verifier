@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Upload } from 'lucide-react';
+import React from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import DropZone from './csv/DropZone';
+import { processCsvFile } from '@/utils/csvProcessor';
 
 interface CsvUploaderProps {
   onCodesLoaded: (codes: string[]) => void;
@@ -9,101 +9,26 @@ interface CsvUploaderProps {
 
 const CsvUploader = ({ onCodesLoaded }: CsvUploaderProps) => {
   const { toast } = useToast();
-  const [isDragging, setIsDragging] = useState(false);
 
-  const handleFileUpload = async (file: File) => {
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const text = event.target?.result as string;
-        const codes = text.split('\n').map(code => code.trim()).filter(Boolean);
-        
-        console.log('Processing discount codes:', codes);
-
-        // Store codes in Supabase
-        const { error } = await supabase
-          .from('discount_codes')
-          .insert(codes.map(code => ({ code })));
-
-        if (error) {
-          console.error('Error storing codes:', error);
-          toast({
-            title: "Error",
-            description: "Failed to store discount codes",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        onCodesLoaded(codes);
-        console.log('Successfully stored discount codes');
-        toast({
-          title: "Success",
-          description: `Loaded ${codes.length} discount codes`,
-          className: "bg-success text-success-foreground",
-        });
-      } catch (error) {
-        console.error('Error parsing CSV:', error);
-        toast({
-          title: "Error",
-          description: "Failed to parse CSV file",
-          variant: "destructive",
-        });
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file && file.type === 'text/csv') {
-      handleFileUpload(file);
-    } else {
+  const handleFileSelect = async (file: File) => {
+    try {
+      const codes = await processCsvFile(file);
+      onCodesLoaded(codes);
+      toast({
+        title: "Success",
+        description: `Loaded ${codes.length} discount codes`,
+        className: "bg-success text-success-foreground",
+      });
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Please upload a CSV file",
+        description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     }
   };
 
-  return (
-    <div
-      className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-        ${isDragging ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary'}`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onClick={() => document.getElementById('fileInput')?.click()}
-    >
-      <input
-        id="fileInput"
-        type="file"
-        accept=".csv"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) handleFileUpload(file);
-        }}
-      />
-      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-      <p className="mt-2 text-sm text-gray-600">
-        Drag and drop your CSV file here, or click to select
-      </p>
-    </div>
-  );
+  return <DropZone onFileSelect={handleFileSelect} />;
 };
 
 export default CsvUploader;
