@@ -10,26 +10,37 @@ const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-brand-light">
       <div className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Sparklight Government Assistance Discount Code Verifier</h1>
+        <div className="text-left mb-8">
+          <span className="text-brand-purple font-bold text-lg">Always</span>
+          <h1 className="text-4xl font-bold text-brand-black mt-2 mb-4">
+            working to deliver faster, stronger internet
+          </h1>
+          <p className="text-lg text-brand-black/80 mb-6">
+            Verify your government assistance discount code below to get started with reliable internet service.
+          </p>
+        </div>
         
         <div className="space-y-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Verify Code</h2>
+          <div className="bg-white p-8 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold text-brand-black mb-6">Verify Code</h2>
             <CodeVerifier codes={codes} />
           </div>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 bg-brand-purple text-white hover:bg-brand-purple/90 uppercase font-bold"
+              >
                 <Upload className="h-4 w-4" />
                 Upload Codes
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Upload Discount Codes</DialogTitle>
+                <DialogTitle className="text-brand-black">Upload Discount Codes</DialogTitle>
               </DialogHeader>
               <div className="mt-4">
                 <CsvUploader 
@@ -39,7 +50,7 @@ const Index = () => {
                   }} 
                 />
                 {codes.length > 0 && (
-                  <p className="mt-4 text-sm text-gray-600">
+                  <p className="mt-4 text-sm text-brand-black/60">
                     {codes.length} codes loaded
                   </p>
                 )}

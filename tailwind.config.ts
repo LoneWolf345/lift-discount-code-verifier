@@ -55,6 +55,11 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				brand: {
+					purple: '#8B3E97',
+					black: '#222222',
+					light: '#F1F1F1'
 				}
 			},
 			borderRadius: {
