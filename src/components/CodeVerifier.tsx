@@ -61,7 +61,7 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
           use_count: newUseCount,
           last_used_at: now.toISOString()
         })
-        .eq('id', existingCode.id); // Using ID for precise record matching
+        .eq('id', existingCode.id);
 
       if (updateError) {
         console.error('Error updating code usage:', updateError);
@@ -73,14 +73,26 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
         return;
       }
 
+      // Fetch the updated record to get the new use count
+      const { data: updatedCode, error: refetchError } = await supabase
+        .from('discount_codes')
+        .select('use_count, last_used_at')
+        .eq('id', existingCode.id)
+        .single();
+
+      if (refetchError) {
+        console.error('Error fetching updated code:', refetchError);
+        return;
+      }
+
       let description = "This code is valid and has never been used before.";
       
-      if (existingCode.use_count > 0) {
-        const lastUsedDate = existingCode.last_used_at 
-          ? format(new Date(existingCode.last_used_at), "MMM do, yyyy 'at' h:mm a")
+      if (updatedCode.use_count > 1) {
+        const lastUsedDate = updatedCode.last_used_at 
+          ? format(new Date(updatedCode.last_used_at), "MMM do, yyyy 'at' h:mm a")
           : 'unknown date';
         
-        description = `This code is valid but has been used ${existingCode.use_count} time${existingCode.use_count === 1 ? '' : 's'}. The last time was on ${lastUsedDate}`;
+        description = `This code is valid but has been used ${updatedCode.use_count} time${updatedCode.use_count === 1 ? '' : 's'}. The last time was on ${lastUsedDate}`;
       }
 
       toast({
