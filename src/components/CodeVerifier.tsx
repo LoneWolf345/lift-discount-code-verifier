@@ -76,9 +76,7 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
           use_count: newUseCount,
           last_used_at: now
         })
-        .eq('id', existingCode.id)
-        .select()
-        .maybeSingle();
+        .eq('id', existingCode.id);
 
       if (updateError) {
         console.error('Error updating code:', updateError);
@@ -90,26 +88,33 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
         return;
       }
 
-      if (!updateResult) {
-        console.error('Update failed - no rows affected');
+      // Fetch the updated record to confirm changes
+      const { data: updatedCode, error: refetchError } = await supabase
+        .from('discount_codes')
+        .select('*')
+        .eq('id', existingCode.id)
+        .maybeSingle();
+
+      if (refetchError || !updatedCode) {
+        console.error('Error fetching updated code:', refetchError);
         toast({
           title: "Error",
-          description: "Failed to update code usage",
+          description: "Failed to verify update",
           variant: "destructive",
         });
         return;
       }
 
-      console.log('Update successful. Updated record:', updateResult);
+      console.log('Update successful. Updated record:', updatedCode);
 
       let description = "This code is valid and has never been used before.";
       
-      if (updateResult.use_count > 1) {
-        const lastUsedDate = updateResult.last_used_at 
-          ? format(new Date(updateResult.last_used_at), "MMM do, yyyy 'at' h:mm a")
+      if (updatedCode.use_count > 1) {
+        const lastUsedDate = updatedCode.last_used_at 
+          ? format(new Date(updatedCode.last_used_at), "MMM do, yyyy 'at' h:mm a")
           : 'unknown date';
         
-        description = `This code is valid but has been used ${updateResult.use_count} time${updateResult.use_count === 1 ? '' : 's'}. The last time was on ${lastUsedDate}`;
+        description = `This code is valid but has been used ${updatedCode.use_count} time${updatedCode.use_count === 1 ? '' : 's'}. The last time was on ${lastUsedDate}`;
       }
 
       console.log('Showing success toast with description:', description);
