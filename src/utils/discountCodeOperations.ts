@@ -45,15 +45,14 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
     
     console.log(`Attempting to update code: ${code}, Current count: ${existingCode.use_count}, New count: ${newUseCount}`);
     
-    const { data: updatedCode, error: updateError } = await supabase
+    const { data: updatedCodes, error: updateError } = await supabase
       .from('discount_codes')
       .update({
         use_count: newUseCount,
         last_used_at: now
       })
-      .eq('code', code.trim())
-      .select()
-      .maybeSingle();
+      .eq('id', existingCode.id) // Use ID for update to ensure uniqueness
+      .select();
 
     if (updateError) {
       console.error('Error updating code:', updateError);
@@ -64,7 +63,7 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
       };
     }
 
-    if (!updatedCode) {
+    if (!updatedCodes || updatedCodes.length === 0) {
       console.error('No code was updated');
       return {
         success: false,
@@ -73,6 +72,7 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
       };
     }
 
+    const updatedCode = updatedCodes[0];
     console.log('Successfully updated code:', updatedCode);
 
     let message = "This code is valid and has never been used before.";
