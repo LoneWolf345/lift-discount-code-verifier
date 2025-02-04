@@ -16,7 +16,13 @@ const Auth = () => {
     try {
       setLoading(true);
       const { error } = isSignUp 
-        ? await supabase.auth.signUp({ email, password })
+        ? await supabase.auth.signUp({ 
+            email, 
+            password,
+            options: {
+              emailRedirectTo: window.location.origin
+            }
+          })
         : await supabase.auth.signInWithPassword({ email, password });
 
       if (error) throw error;
@@ -30,6 +36,7 @@ const Auth = () => {
 
       if (!isSignUp) navigate('/');
     } catch (error) {
+      console.error('Auth error:', error);
       toast({
         title: "Error",
         description: error.message,
@@ -41,7 +48,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-brand-light flex items-center justify-center">
+    <div className="min-h-screen bg-[#f6f1f7] flex items-center justify-center">
       <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-sm">
         <div className="text-center mb-8">
           <span className="text-brand-purple font-bold text-lg">Sparklight</span>
