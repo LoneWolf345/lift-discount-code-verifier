@@ -39,7 +39,7 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
 
     console.log('Found existing code:', existingCode);
     
-    // Update the code usage - using code instead of id for the update
+    // Update the code usage
     const newUseCount = (existingCode.use_count || 0) + 1;
     const now = new Date().toISOString();
     
@@ -53,7 +53,7 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
       })
       .eq('code', code.trim())
       .select()
-      .single();
+      .maybeSingle();
 
     if (updateError) {
       console.error('Error updating code:', updateError);
@@ -64,7 +64,16 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
       };
     }
 
-    console.log('Update successful. Updated record:', updatedCode);
+    if (!updatedCode) {
+      console.error('No code was updated');
+      return {
+        success: false,
+        message: "Failed to update code",
+        variant: "destructive"
+      };
+    }
+
+    console.log('Successfully updated code:', updatedCode);
 
     let message = "This code is valid and has never been used before.";
     
