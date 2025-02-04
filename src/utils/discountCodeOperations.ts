@@ -12,7 +12,7 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
   console.log('Starting verification for code:', code);
   
   try {
-    // Fetch the existing code
+    // First, fetch the code
     const { data: existingCode, error: fetchError } = await supabase
       .from('discount_codes')
       .select('*')
@@ -39,41 +39,27 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
 
     console.log('Found existing code:', existingCode);
     
-    // Update the code usage
+    // Update the code usage - using code instead of id for the update
     const newUseCount = (existingCode.use_count || 0) + 1;
     const now = new Date().toISOString();
     
-    console.log('Attempting to update code. ID:', existingCode.id, 'Current count:', existingCode.use_count, 'New count:', newUseCount);
+    console.log(`Attempting to update code: ${code}, Current count: ${existingCode.use_count}, New count: ${newUseCount}`);
     
-    const { error: updateError } = await supabase
+    const { data: updatedCode, error: updateError } = await supabase
       .from('discount_codes')
       .update({
         use_count: newUseCount,
         last_used_at: now
       })
-      .eq('id', existingCode.id);
+      .eq('code', code.trim())
+      .select()
+      .single();
 
     if (updateError) {
       console.error('Error updating code:', updateError);
       return {
         success: false,
         message: "Failed to update code usage",
-        variant: "destructive"
-      };
-    }
-
-    // Fetch the updated record to confirm changes
-    const { data: updatedCode, error: refetchError } = await supabase
-      .from('discount_codes')
-      .select('*')
-      .eq('id', existingCode.id)
-      .maybeSingle();
-
-    if (refetchError || !updatedCode) {
-      console.error('Error fetching updated code:', refetchError);
-      return {
-        success: false,
-        message: "Failed to verify update",
         variant: "destructive"
       };
     }
