@@ -59,7 +59,7 @@ export default {
 				brand: {
 					purple: '#8B3E97',
 					black: '#222222',
-					light: '#F1F1F1'
+					light: '#f6f1f7'  // Updated this color
 				}
 			},
 			borderRadius: {
