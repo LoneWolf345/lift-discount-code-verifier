@@ -13,12 +13,12 @@ const Index = () => {
     <div className="min-h-screen bg-brand-light">
       <div className="max-w-4xl mx-auto p-6">
         <div className="text-left mb-8">
-          <span className="text-brand-purple font-bold text-lg">Always</span>
+          <span className="text-brand-purple font-bold text-lg">Sparklight</span>
           <h1 className="text-4xl font-bold text-brand-black mt-2 mb-4">
-            working to deliver faster, stronger internet
+            Discount Code Verifier
           </h1>
           <p className="text-lg text-brand-black/80 mb-6">
-            Verify your government assistance discount code below to get started with reliable internet service.
+            Verify the customers discount code below.
           </p>
         </div>
         
