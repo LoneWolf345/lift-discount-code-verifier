@@ -3,8 +3,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Search } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
+import { formatCode } from '@/utils/codeFormatting';
+import { verifyDiscountCode } from '@/utils/discountCodeOperations';
 
 interface CodeVerifierProps {
   codes: string[];
@@ -14,16 +14,6 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
   const [code, setCode] = useState('');
   const { toast } = useToast();
 
-  const formatCode = (input: string) => {
-    const cleanCode = input.replace(/-/g, '').toUpperCase();
-    
-    if (cleanCode.length >= 3) {
-      return `${cleanCode.slice(0, 3)}-${cleanCode.slice(3, 6)}`;
-    }
-    
-    return cleanCode;
-  };
-
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formattedCode = formatCode(e.target.value);
     if (formattedCode.length <= 7) {
@@ -31,106 +21,15 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
     }
   };
 
-  const verifyCode = async () => {
-    try {
-      console.log('Starting verification for code:', code);
-      
-      // First, fetch the existing code
-      const { data: existingCode, error: fetchError } = await supabase
-        .from('discount_codes')
-        .select('*')
-        .eq('code', code.trim())
-        .maybeSingle();
-      
-      if (fetchError) {
-        console.error('Error fetching code:', fetchError);
-        toast({
-          title: "Error",
-          description: "Failed to verify discount code",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (!existingCode) {
-        console.log('Code not found:', code);
-        toast({
-          title: "Invalid Code",
-          description: "This discount code was not found",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Found existing code:', existingCode);
-      
-      // Update the code usage
-      const newUseCount = (existingCode.use_count || 0) + 1;
-      const now = new Date().toISOString();
-      
-      console.log('Attempting to update code. ID:', existingCode.id, 'Current count:', existingCode.use_count, 'New count:', newUseCount);
-      
-      const { data: updateResult, error: updateError } = await supabase
-        .from('discount_codes')
-        .update({
-          use_count: newUseCount,
-          last_used_at: now
-        })
-        .eq('id', existingCode.id);
-
-      if (updateError) {
-        console.error('Error updating code:', updateError);
-        toast({
-          title: "Error",
-          description: "Failed to update code usage",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Fetch the updated record to confirm changes
-      const { data: updatedCode, error: refetchError } = await supabase
-        .from('discount_codes')
-        .select('*')
-        .eq('id', existingCode.id)
-        .maybeSingle();
-
-      if (refetchError || !updatedCode) {
-        console.error('Error fetching updated code:', refetchError);
-        toast({
-          title: "Error",
-          description: "Failed to verify update",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Update successful. Updated record:', updatedCode);
-
-      let description = "This code is valid and has never been used before.";
-      
-      if (updatedCode.use_count > 1) {
-        const lastUsedDate = updatedCode.last_used_at 
-          ? format(new Date(updatedCode.last_used_at), "MMM do, yyyy 'at' h:mm a")
-          : 'unknown date';
-        
-        description = `This code is valid but has been used ${updatedCode.use_count} time${updatedCode.use_count === 1 ? '' : 's'}. The last time was on ${lastUsedDate}`;
-      }
-
-      console.log('Showing success toast with description:', description);
-      toast({
-        title: "Valid Code",
-        description: description,
-        className: "bg-success text-success-foreground",
-      });
-    } catch (error) {
-      console.error('Unexpected error during verification:', error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
-    }
+  const handleVerify = async () => {
+    const result = await verifyDiscountCode(code);
+    
+    toast({
+      title: result.success ? "Valid Code" : "Error",
+      description: result.message,
+      variant: result.variant,
+      className: result.className,
+    });
   };
 
   return (
@@ -143,7 +42,7 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
         className="flex-1"
         maxLength={7}
       />
-      <Button onClick={verifyCode} className="bg-primary hover:bg-primary/90">
+      <Button onClick={handleVerify} className="bg-primary hover:bg-primary/90">
         <Search className="h-4 w-4 mr-2" />
         Verify
       </Button>
