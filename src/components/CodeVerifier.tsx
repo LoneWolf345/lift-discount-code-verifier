@@ -70,13 +70,15 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
       
       console.log('Attempting to update code. ID:', existingCode.id, 'Current count:', existingCode.use_count, 'New count:', newUseCount);
       
-      const { error: updateError } = await supabase
+      const { data: updateResult, error: updateError } = await supabase
         .from('discount_codes')
         .update({
           use_count: newUseCount,
           last_used_at: now
         })
-        .eq('id', existingCode.id);
+        .eq('id', existingCode.id)
+        .select()
+        .single();
 
       if (updateError) {
         console.error('Error updating code:', updateError);
@@ -88,35 +90,26 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
         return;
       }
 
-      console.log('Update successful, fetching latest data');
-
-      // Verify the update by fetching the latest data
-      const { data: verifiedCode, error: verifyError } = await supabase
-        .from('discount_codes')
-        .select('*')
-        .eq('id', existingCode.id)
-        .maybeSingle();
-
-      if (verifyError) {
-        console.error('Error verifying update:', verifyError);
+      if (!updateResult) {
+        console.error('Update failed - no rows affected');
+        toast({
+          title: "Error",
+          description: "Failed to update code usage",
+          variant: "destructive",
+        });
         return;
       }
 
-      if (!verifiedCode) {
-        console.error('Could not verify the update - code not found');
-        return;
-      }
-
-      console.log('Verified updated code:', verifiedCode);
+      console.log('Update successful. Updated record:', updateResult);
 
       let description = "This code is valid and has never been used before.";
       
-      if (verifiedCode.use_count > 1) {
-        const lastUsedDate = verifiedCode.last_used_at 
-          ? format(new Date(verifiedCode.last_used_at), "MMM do, yyyy 'at' h:mm a")
+      if (updateResult.use_count > 1) {
+        const lastUsedDate = updateResult.last_used_at 
+          ? format(new Date(updateResult.last_used_at), "MMM do, yyyy 'at' h:mm a")
           : 'unknown date';
         
-        description = `This code is valid but has been used ${verifiedCode.use_count} time${verifiedCode.use_count === 1 ? '' : 's'}. The last time was on ${lastUsedDate}`;
+        description = `This code is valid but has been used ${updateResult.use_count} time${updateResult.use_count === 1 ? '' : 's'}. The last time was on ${lastUsedDate}`;
       }
 
       console.log('Showing success toast with description:', description);
