@@ -78,7 +78,7 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
         })
         .eq('id', existingCode.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (updateError) {
         console.error('Error updating code:', updateError);
@@ -97,10 +97,15 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
         .from('discount_codes')
         .select('*')
         .eq('id', existingCode.id)
-        .single();
+        .maybeSingle();
 
       if (verifyError) {
         console.error('Error verifying update:', verifyError);
+        return;
+      }
+
+      if (!verifiedCode) {
+        console.error('Could not verify the update - code not found');
         return;
       }
 
