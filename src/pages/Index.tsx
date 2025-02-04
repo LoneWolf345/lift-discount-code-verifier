@@ -52,7 +52,7 @@ const Index = () => {
               Verify the customers discount code below.
             </p>
           </div>
-          {session ? (
+          {session && (
             <Button 
               variant="outline" 
               onClick={handleSignOut}
@@ -60,14 +60,6 @@ const Index = () => {
             >
               <LogOut className="h-4 w-4" />
               Sign Out
-            </Button>
-          ) : (
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/auth')}
-              className="flex items-center gap-2"
-            >
-              Sign In
             </Button>
           )}
         </div>
