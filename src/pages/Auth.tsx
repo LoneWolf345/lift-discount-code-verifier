@@ -12,29 +12,22 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleAuth = async (isSignUp: boolean) => {
+  const handleSignIn = async () => {
     try {
       setLoading(true);
-      const { error } = isSignUp 
-        ? await supabase.auth.signUp({ 
-            email, 
-            password,
-            options: {
-              emailRedirectTo: window.location.origin
-            }
-          })
-        : await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
 
       if (error) throw error;
 
       toast({
-        title: isSignUp ? "Account created" : "Welcome back!",
-        description: isSignUp 
-          ? "Please check your email to verify your account" 
-          : "You have been successfully logged in",
+        title: "Welcome back!",
+        description: "You have been successfully logged in",
       });
 
-      if (!isSignUp) navigate('/');
+      navigate('/');
     } catch (error) {
       console.error('Auth error:', error);
       toast({
@@ -73,23 +66,13 @@ const Auth = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <div className="flex gap-4">
-            <Button 
-              className="flex-1"
-              onClick={() => handleAuth(false)} 
-              disabled={loading}
-            >
-              Sign In
-            </Button>
-            <Button 
-              className="flex-1"
-              variant="outline"
-              onClick={() => handleAuth(true)}
-              disabled={loading}
-            >
-              Sign Up
-            </Button>
-          </div>
+          <Button 
+            className="w-full"
+            onClick={handleSignIn} 
+            disabled={loading}
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </Button>
         </div>
       </div>
     </div>
