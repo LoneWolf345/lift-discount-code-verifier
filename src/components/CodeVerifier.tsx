@@ -70,15 +70,13 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
       
       console.log('Attempting to update code. ID:', existingCode.id, 'Current count:', existingCode.use_count, 'New count:', newUseCount);
       
-      const { data: updateResult, error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .from('discount_codes')
         .update({
           use_count: newUseCount,
           last_used_at: now
         })
-        .eq('id', existingCode.id)
-        .select()
-        .maybeSingle();
+        .eq('id', existingCode.id);
 
       if (updateError) {
         console.error('Error updating code:', updateError);
@@ -90,7 +88,7 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
         return;
       }
 
-      console.log('Update successful. Result:', updateResult);
+      console.log('Update successful, fetching latest data');
 
       // Verify the update by fetching the latest data
       const { data: verifiedCode, error: verifyError } = await supabase
