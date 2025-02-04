@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
 
 interface CodeVerifierProps {
   codes: string[];
@@ -36,14 +37,15 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
   const verifyCode = async () => {
     console.log('Verifying code:', code);
     
-    const { data, error } = await supabase
+    // First, check if the code exists and get its usage data
+    const { data: existingCode, error: fetchError } = await supabase
       .from('discount_codes')
-      .select('code')
+      .select('code, use_count, last_used_at')
       .eq('code', code.trim())
       .maybeSingle();
     
-    if (error) {
-      console.error('Error verifying code:', error);
+    if (fetchError) {
+      console.error('Error verifying code:', fetchError);
       toast({
         title: "Error",
         description: "Failed to verify discount code",
@@ -52,10 +54,43 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
       return;
     }
     
-    if (data) {
+    if (existingCode) {
+      // Code is valid, update usage information
+      const newUseCount = (existingCode.use_count || 0) + 1;
+      const now = new Date();
+      
+      const { error: updateError } = await supabase
+        .from('discount_codes')
+        .update({
+          use_count: newUseCount,
+          last_used_at: now.toISOString()
+        })
+        .eq('code', code.trim());
+
+      if (updateError) {
+        console.error('Error updating code usage:', updateError);
+        toast({
+          title: "Error",
+          description: "Failed to update code usage",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Prepare success message based on usage
+      let description = "This code is valid and has never been used before.";
+      
+      if (existingCode.use_count > 0) {
+        const lastUsedDate = existingCode.last_used_at 
+          ? format(new Date(existingCode.last_used_at), "MMM do, yyyy 'at' h:mm a")
+          : 'unknown date';
+        
+        description = `This code is valid but has been used ${existingCode.use_count} time${existingCode.use_count === 1 ? '' : 's'}. The last time was on ${lastUsedDate}`;
+      }
+
       toast({
         title: "Valid Code",
-        description: "This discount code is valid!",
+        description: description,
         className: "bg-success text-success-foreground",
       });
     } else {

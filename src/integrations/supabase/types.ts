@@ -14,16 +14,22 @@ export type Database = {
           code: string
           created_at: string
           id: string
+          last_used_at: string | null
+          use_count: number | null
         }
         Insert: {
           code: string
           created_at?: string
           id?: string
+          last_used_at?: string | null
+          use_count?: number | null
         }
         Update: {
           code?: string
           created_at?: string
           id?: string
+          last_used_at?: string | null
+          use_count?: number | null
         }
         Relationships: []
       }
