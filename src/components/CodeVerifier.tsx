@@ -15,10 +15,8 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
   const { toast } = useToast();
 
   const formatCode = (input: string) => {
-    // Remove any existing dashes and convert to uppercase
     const cleanCode = input.replace(/-/g, '').toUpperCase();
     
-    // If we have 3 or more characters, insert dash after the third character
     if (cleanCode.length >= 3) {
       return `${cleanCode.slice(0, 3)}-${cleanCode.slice(3, 6)}`;
     }
@@ -28,7 +26,6 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formattedCode = formatCode(e.target.value);
-    // Only update if the code is 7 or fewer characters (including dash)
     if (formattedCode.length <= 7) {
       setCode(formattedCode);
     }
@@ -37,10 +34,9 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
   const verifyCode = async () => {
     console.log('Verifying code:', code);
     
-    // First, check if the code exists and get its usage data
     const { data: existingCode, error: fetchError } = await supabase
       .from('discount_codes')
-      .select('code, use_count, last_used_at')
+      .select('id, code, use_count, last_used_at')
       .eq('code', code.trim())
       .maybeSingle();
     
@@ -55,17 +51,17 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
     }
     
     if (existingCode) {
-      // Code is valid, update usage information
       const newUseCount = (existingCode.use_count || 0) + 1;
       const now = new Date();
       
+      console.log('Updating code usage for ID:', existingCode.id);
       const { error: updateError } = await supabase
         .from('discount_codes')
         .update({
           use_count: newUseCount,
           last_used_at: now.toISOString()
         })
-        .eq('code', code.trim());
+        .eq('id', existingCode.id); // Using ID for precise record matching
 
       if (updateError) {
         console.error('Error updating code usage:', updateError);
@@ -77,7 +73,6 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
         return;
       }
 
-      // Prepare success message based on usage
       let description = "This code is valid and has never been used before.";
       
       if (existingCode.use_count > 0) {
