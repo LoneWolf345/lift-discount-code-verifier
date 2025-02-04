@@ -78,7 +78,7 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
         })
         .eq('id', existingCode.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (updateError) {
         console.error('Error updating code:', updateError);
