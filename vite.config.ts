@@ -10,6 +10,10 @@ export default defineConfig(({ mode }) => ({
     host: "0.0.0.0", // Allow connections from all hosts
     port: Number(process.env.PORT) || 8080, // Use PORT env variable or default to 8080
   },
+  preview: {
+    host: "0.0.0.0",
+    port: Number(process.env.PORT) || 8080,
+  },
   plugins: [
     react(),
     mode === 'development' &&
