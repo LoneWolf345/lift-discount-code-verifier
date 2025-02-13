@@ -1,3 +1,4 @@
 
 NODE_ENV=production
 NPM_RUN=preview
+NPM_CONFIG_LEGACY_PEER_DEPS=true
