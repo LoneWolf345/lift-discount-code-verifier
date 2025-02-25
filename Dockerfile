@@ -2,16 +2,18 @@
 # Build stage
 FROM node:20.11-alpine3.19 AS builder
 
-WORKDIR /app
+# Create app directory structure
+WORKDIR /opt/app-root/src
 
-# Set npm cache directory to a location within /app
-ENV npm_config_cache=/app/.npm
+# Set npm cache directory
+ENV npm_config_cache=/opt/app-root/.npm
 
 # Copy package files
 COPY package*.json ./
 
 # Install all dependencies (including dev dependencies)
-RUN npm ci
+RUN mkdir -p /opt/app-root/.npm && \
+    npm ci
 
 # Copy source code
 COPY . .
@@ -22,25 +24,27 @@ RUN npm run build
 # Production stage
 FROM node:20.11-alpine3.19 AS production
 
-# Create app directory and npm cache directory
-RUN mkdir -p /app/.npm
+# Create OpenShift-compatible directory structure
+RUN mkdir -p /opt/app-root/src \
+    /opt/app-root/.npm \
+    /opt/app-root/home && \
+    chown -R 1001:0 /opt/app-root && \
+    chmod -R g=u /opt/app-root
 
-# Create non-root user and group with flexible UID/GID for OpenShift
-RUN addgroup -g 1002 appgroup && \
-    adduser -u 1002 -G appgroup -s /bin/sh -D appuser && \
-    chown -R 1002:1002 /app
+WORKDIR /opt/app-root/src
 
-WORKDIR /app
-
-# Set npm cache directory
-ENV npm_config_cache=/app/.npm
+# Set environment variables
+ENV HOME=/opt/app-root/home \
+    npm_config_cache=/opt/app-root/.npm \
+    NODE_ENV=production \
+    PORT=8080
 
 # Copy package files and install production dependencies only
 COPY package*.json ./
 RUN npm ci --omit=dev
 
 # Copy built assets from builder stage
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /opt/app-root/src/dist ./dist
 
 # Copy Vite configuration (needed for preview command)
 COPY vite.config.ts ./
@@ -48,16 +52,15 @@ COPY vite.config.ts ./
 # Install curl for healthcheck
 RUN apk --no-cache add curl
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=8080
+# Create .npmrc file to ensure correct cache location
+RUN echo "cache=/opt/app-root/.npm" > /opt/app-root/home/.npmrc
 
-# Change permissions to support arbitrary user IDs in OpenShift
-RUN chown -R 1002:0 /app && \
-    chmod -R g=u /app
+# Set permissions for OpenShift
+RUN chown -R 1001:0 /opt/app-root && \
+    chmod -R g=u /opt/app-root
 
-# Switch to non-root user
-USER 1002
+# Switch to non-root user (arbitrary user ID support)
+USER 1001
 
 # OpenShift-specific labels
 LABEL io.openshift.expose-services="8080:http" \

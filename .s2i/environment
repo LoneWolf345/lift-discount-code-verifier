@@ -1,4 +1,6 @@
 
 NODE_ENV=production
 NPM_RUN=preview
-NPM_CONFIG_LEGACY_PEER_DEPS=true
+PORT=8080
+HOME=/opt/app-root/home
+npm_config_cache=/opt/app-root/.npm
