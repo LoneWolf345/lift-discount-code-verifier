@@ -8,8 +8,8 @@ WORKDIR /opt/app-root/src
 # Copy package files
 COPY package*.json ./
 
-# Install all dependencies (including dev dependencies)
-RUN npm ci
+# Install all dependencies (including dev dependencies) with cache disabled
+RUN npm ci --no-cache
 
 # Copy source code
 COPY . .
@@ -31,13 +31,11 @@ WORKDIR /opt/app-root/src
 # Set environment variables
 ENV HOME=/opt/app-root/home \
     NODE_ENV=production \
-    PORT=8080 \
-    NPM_CONFIG_CACHE=/dev/null \
-    NPM_CONFIG_LOGS=/dev/null
+    PORT=8080
 
 # Copy package files and install production dependencies only
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --no-cache
 
 # Copy built assets from builder stage
 COPY --from=builder /opt/app-root/src/dist ./dist
