@@ -3,4 +3,3 @@ NODE_ENV=production
 NPM_RUN=preview
 PORT=8080
 HOME=/opt/app-root/home
-npm_config_cache=/opt/app-root/.npm

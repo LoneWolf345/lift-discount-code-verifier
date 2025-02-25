@@ -5,15 +5,11 @@ FROM node:20.11-alpine3.19 AS builder
 # Create app directory structure
 WORKDIR /opt/app-root/src
 
-# Set npm cache directory
-ENV npm_config_cache=/opt/app-root/.npm
-
 # Copy package files
 COPY package*.json ./
 
 # Install all dependencies (including dev dependencies)
-RUN mkdir -p /opt/app-root/.npm && \
-    npm ci
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -26,7 +22,6 @@ FROM node:20.11-alpine3.19 AS production
 
 # Create OpenShift-compatible directory structure
 RUN mkdir -p /opt/app-root/src \
-    /opt/app-root/.npm \
     /opt/app-root/home && \
     chown -R 1001:0 /opt/app-root && \
     chmod -R g=u /opt/app-root
@@ -35,9 +30,10 @@ WORKDIR /opt/app-root/src
 
 # Set environment variables
 ENV HOME=/opt/app-root/home \
-    npm_config_cache=/opt/app-root/.npm \
     NODE_ENV=production \
-    PORT=8080
+    PORT=8080 \
+    NPM_CONFIG_CACHE=/dev/null \
+    NPM_CONFIG_LOGS=/dev/null
 
 # Copy package files and install production dependencies only
 COPY package*.json ./
@@ -51,9 +47,6 @@ COPY vite.config.ts ./
 
 # Install curl for healthcheck
 RUN apk --no-cache add curl
-
-# Create .npmrc file to ensure correct cache location
-RUN echo "cache=/opt/app-root/.npm" > /opt/app-root/home/.npmrc
 
 # Set permissions for OpenShift
 RUN chown -R 1001:0 /opt/app-root && \
