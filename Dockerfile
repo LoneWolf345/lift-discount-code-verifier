@@ -26,9 +26,9 @@ FROM node:20.11-alpine3.19 AS production
 RUN mkdir -p /app/.npm
 
 # Create non-root user and group with flexible UID/GID for OpenShift
-RUN addgroup -g 1000 appgroup && \
-    adduser -u 1000 -G appgroup -s /bin/sh -D appuser && \
-    chown -R 1000:1000 /app
+RUN addgroup -g 1002 appgroup && \
+    adduser -u 1002 -G appgroup -s /bin/sh -D appuser && \
+    chown -R 1002:1002 /app
 
 WORKDIR /app
 
@@ -53,11 +53,11 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 # Change permissions to support arbitrary user IDs in OpenShift
-RUN chown -R 1000:0 /app && \
+RUN chown -R 1002:0 /app && \
     chmod -R g=u /app
 
 # Switch to non-root user
-USER 1000
+USER 1002
 
 # OpenShift-specific labels
 LABEL io.openshift.expose-services="8080:http" \
