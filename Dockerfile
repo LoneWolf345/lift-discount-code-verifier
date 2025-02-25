@@ -4,6 +4,9 @@ FROM node:20.11-alpine3.19 AS builder
 
 WORKDIR /app
 
+# Set npm cache directory to a location within /app
+ENV npm_config_cache=/app/.npm
+
 # Copy package files
 COPY package*.json ./
 
@@ -19,10 +22,18 @@ RUN npm run build
 # Production stage
 FROM node:20.11-alpine3.19 AS production
 
-# Create non-root user and group
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Create app directory and npm cache directory
+RUN mkdir -p /app/.npm
+
+# Create non-root user and group with flexible UID/GID for OpenShift
+RUN addgroup -g 1000 appgroup && \
+    adduser -u 1000 -G appgroup -s /bin/sh -D appuser && \
+    chown -R 1000:1000 /app
 
 WORKDIR /app
+
+# Set npm cache directory
+ENV npm_config_cache=/app/.npm
 
 # Copy package files and install production dependencies only
 COPY package*.json ./
@@ -41,11 +52,12 @@ RUN apk --no-cache add curl
 ENV NODE_ENV=production
 ENV PORT=8080
 
-# Set ownership to non-root user
-RUN chown -R appuser:appgroup /app
+# Change permissions to support arbitrary user IDs in OpenShift
+RUN chown -R 1000:0 /app && \
+    chmod -R g=u /app
 
 # Switch to non-root user
-USER appuser
+USER 1000
 
 # OpenShift-specific labels
 LABEL io.openshift.expose-services="8080:http" \
