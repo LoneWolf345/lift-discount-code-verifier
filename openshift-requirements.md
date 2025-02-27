@@ -7,6 +7,8 @@
 - [x] Is UID 1001 acceptable? Yes/No: No (Must use UID in allowed range)
 - [x] Required fsGroup: 0
 - [x] Additional SCC policies: nonroot-v2
+- [x] MCS labels requirement: s0:c48,c17
+- [x] Supplemental groups configuration: 1002290000/10000
 
 ## 2. Resource Requirements
 ### Container Resources
@@ -52,6 +54,7 @@
   --------------|-----|-------
   None required |     |
   ```
+- [x] Environment name: discount-code-verifier-uat (UAT environment)
 
 ## 7. Monitoring and Health Checks
 - [x] Monitoring solution: Container health checks
@@ -65,20 +68,28 @@
 - [x] Required certifications: None specified
 - [x] Audit logging requirements: None specified
 - [x] Container signing requirements: None specified
+- [x] Pod Security Policy compliance: Baseline (Kubernetes v1.24)
+- [x] Container security requirements:
+  - Must run as non-root user
+  - No privileged containers
+  - No host namespace sharing
+  - No hostPath volumes
+  - Restricted capabilities
 
 ## 9. Cluster Information
 - [x] OpenShift version: 4.x (compatible with current configuration)
-- [x] Kubernetes version: 1.x (compatible with current configuration)
+- [x] Kubernetes version: 1.24 (as per Pod Security Policy version)
 - [x] Available node selectors: None specified
 - [x] Node taints/tolerations: None specified
 - [x] Cluster-specific limitations: None specified
 
 ## 10. Build and Deployment
-- [x] Preferred CI/CD tools: OpenShift Build Config
+- [x] Preferred CI/CD tools: OpenShift Pipelines (Tekton) 1.17.0
 - [x] Source repository access: Public Git repository
 - [x] Deployment strategy (Rolling/Blue-Green): Rolling update (default)
 - [x] Build strategy requirements: Docker strategy
 - [x] Required build resources: Node.js 20 build environment
+- [x] Pipeline configuration: Standard Tekton pipeline with build and deploy tasks
 
 ## Additional Notes
 Please provide any additional requirements or considerations specific to your OpenShift environment:
@@ -90,6 +101,10 @@ Notes:
 3. Container configured to support arbitrary UID assignment within the range 1002290000-1002300000
 4. Health checks are configured in the Dockerfile
 5. Application listens on port 8080 as required by OpenShift
+6. Environment naming convention follows the pattern: discount-code-verifier-uat
+7. Application must conform to baseline Pod Security Policy standards (Kubernetes v1.24)
+8. MCS labels (s0:c48,c17) must be properly configured
+9. Container must support supplemental groups configuration matching the UID range
 ```
 
 ## Contact Information
