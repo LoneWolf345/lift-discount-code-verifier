@@ -20,17 +20,20 @@ RUN npm run build
 # Production stage
 FROM node:20.11-alpine3.19 AS production
 
-# Create OpenShift-compatible directory structure
+# Create OpenShift-compatible directory structure and npm cache directory
 RUN mkdir -p /opt/app-root/src \
-    /opt/app-root/home && \
-    chmod -R 775 /opt/app-root
+    /opt/app-root/home \
+    /opt/app-root/home/.npm && \
+    chmod -R 775 /opt/app-root && \
+    chmod -R 775 /opt/app-root/home/.npm
 
 WORKDIR /opt/app-root/src
 
-# Set environment variables
+# Set environment variables including npm cache location
 ENV HOME=/opt/app-root/home \
     NODE_ENV=production \
-    PORT=8080
+    PORT=8080 \
+    NPM_CONFIG_CACHE=/opt/app-root/home/.npm
 
 # Copy package files and install production dependencies only
 COPY package*.json ./
@@ -48,11 +51,9 @@ RUN apk --no-cache add curl
 # Set permissions for OpenShift arbitrary user ID support
 # Any UID in the OpenShift specified range (1002290000-1002300000) needs write access
 RUN chown -R 1002290000:0 /opt/app-root && \
-    chmod -R g=u /opt/app-root
-
-# Drop capabilities to comply with OpenShift security requirements
-# Annotations for OpenShift to configure MCS labels and supplemental groups
-# are handled at the deployment level
+    chmod -R g=u /opt/app-root && \
+    chown -R 1002290000:0 /opt/app-root/home/.npm && \
+    chmod -R g=u /opt/app-root/home/.npm
 
 # Switch to unprivileged user (OpenShift will assign the appropriate UID)
 USER 1002290000
@@ -72,4 +73,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:8080/ || exit 1
 
 # Start the application
-CMD ["npm", "run", "preview"]
+CMD ["npm", "run", "preview", "--", "--host", "--port", "8080"]
