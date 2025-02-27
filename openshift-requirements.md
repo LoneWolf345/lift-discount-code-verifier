@@ -2,9 +2,9 @@
 # OpenShift Deployment Requirements Template
 
 ## 1. Security Context Constraints (SCC)
-- [x] Allowed UID range: 1001
+- [x] Allowed UID range: 1002290000-1002300000 (10000 UIDs)
 - [x] Allowed GID range: 0
-- [x] Is UID 1001 acceptable? Yes/No: Yes (Currently using this)
+- [x] Is UID 1001 acceptable? Yes/No: No (Must use UID in allowed range)
 - [x] Required fsGroup: 0
 - [x] Additional SCC policies: nonroot-v2
 
@@ -87,7 +87,7 @@ Please provide any additional requirements or considerations specific to your Op
 Notes:
 1. Application is configured as a stateless Node.js application using Vite
 2. Using multi-stage Docker build to minimize final image size
-3. Non-root user configuration is implemented (UID 1001)
+3. Container configured to support arbitrary UID assignment within the range 1002290000-1002300000
 4. Health checks are configured in the Dockerfile
 5. Application listens on port 8080 as required by OpenShift
 ```
@@ -97,4 +97,3 @@ Notes:
 - Role: ________________
 - Email: ________________
 - Emergency Contact: ________________
-

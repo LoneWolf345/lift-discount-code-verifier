@@ -23,8 +23,7 @@ FROM node:20.11-alpine3.19 AS production
 # Create OpenShift-compatible directory structure
 RUN mkdir -p /opt/app-root/src \
     /opt/app-root/home && \
-    chown -R 1001:0 /opt/app-root && \
-    chmod -R g=u /opt/app-root
+    chmod -R 775 /opt/app-root
 
 WORKDIR /opt/app-root/src
 
@@ -46,12 +45,13 @@ COPY vite.config.ts ./
 # Install curl for healthcheck
 RUN apk --no-cache add curl
 
-# Set permissions for OpenShift
-RUN chown -R 1001:0 /opt/app-root && \
+# Set permissions for OpenShift arbitrary user ID support
+# Any UID in the OpenShift specified range (1002290000-1002300000) needs write access
+RUN chown -R 1002290000:0 /opt/app-root && \
     chmod -R g=u /opt/app-root
 
-# Switch to non-root user (arbitrary user ID support)
-USER 1001
+# Switch to unprivileged user (OpenShift will assign the appropriate UID)
+USER 1002290000
 
 # OpenShift-specific labels
 LABEL io.openshift.expose-services="8080:http" \
