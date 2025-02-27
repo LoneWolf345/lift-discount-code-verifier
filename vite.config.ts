@@ -13,18 +13,24 @@ export default defineConfig({
   },
   server: {
     port: 8080,
-    host: '0.0.0.0',  // This allows access from outside the container
-    allowedHosts: [
-      '697be092-4603-4d66-a348-5098640004d6.lovableproject.com',
-      'lift-discount-code-verifier-discount-code-verifier-uat.apps.uat-ocp4.uat.corp.cableone.net'
-    ]
+    host: true,
+    cors: true,
+    strictPort: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
+    }
   },
   preview: {
     port: 8080,
-    host: '0.0.0.0',  // This allows access from outside the container
-    allowedHosts: [
-      '697be092-4603-4d66-a348-5098640004d6.lovableproject.com',
-      'lift-discount-code-verifier-discount-code-verifier-uat.apps.uat-ocp4.uat.corp.cableone.net'
-    ]
+    host: true,
+    cors: true,
+    strictPort: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
+    }
   }
 })
