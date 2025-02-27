@@ -24,12 +24,20 @@ export default defineConfig({
     watch: {
       usePolling: true
     },
-    cors: true
+    cors: true,
+    allowedHosts: [
+      '697be092-4603-4d66-a348-5098640004d6.lovableproject.com',
+      'lift-discount-code-verifier-discount-code-verifier-uat.apps.uat-ocp4.uat.corp.cableone.net'
+    ]
   },
   preview: {
     port: 8080,
     host: '0.0.0.0',
-    cors: true
+    cors: true,
+    allowedHosts: [
+      '697be092-4603-4d66-a348-5098640004d6.lovableproject.com',
+      'lift-discount-code-verifier-discount-code-verifier-uat.apps.uat-ocp4.uat.corp.cableone.net'
+    ]
   },
   build: {
     outDir: 'dist',
