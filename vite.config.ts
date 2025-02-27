@@ -13,10 +13,12 @@ export default defineConfig({
   },
   server: {
     port: 8080,
-    host: '0.0.0.0'  // This allows access from outside the container
+    host: '0.0.0.0',  // This allows access from outside the container
+    allowedHosts: ['697be092-4603-4d66-a348-5098640004d6.lovableproject.com']
   },
   preview: {
     port: 8080,
-    host: '0.0.0.0'  // This allows access from outside the container
+    host: '0.0.0.0',  // This allows access from outside the container
+    allowedHosts: ['697be092-4603-4d66-a348-5098640004d6.lovableproject.com']
   }
 })
