@@ -1,0 +1,19 @@
+
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: discount-code-verifier-pipeline-run-
+spec:
+  pipelineRef:
+    name: discount-code-verifier-pipeline
+  params:
+    - name: git-url
+      value: "https://github.com/your-org/discount-code-verifier.git"  # Update with actual repo
+    - name: git-revision
+      value: "main"
+    - name: image-name
+      value: "image-registry.openshift-image-registry.svc:5000/discount-code-verifier-uat/discount-code-verifier"
+  workspaces:
+    - name: shared-workspace
+      persistentVolumeClaim:
+        claimName: discount-code-verifier-pipeline-pvc

@@ -1,0 +1,67 @@
+
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: discount-code-verifier-pipeline
+spec:
+  params:
+    - name: git-url
+      type: string
+      description: The git repository URL to clone from
+    - name: git-revision
+      type: string
+      description: The git revision to checkout
+      default: "main"
+    - name: image-name
+      type: string
+      description: The name of the image to build and deploy
+      default: "image-registry.openshift-image-registry.svc:5000/discount-code-verifier-uat/discount-code-verifier"
+  workspaces:
+    - name: shared-workspace
+      description: Workspace containing the Git source code
+  tasks:
+    - name: git-clone
+      taskRef:
+        name: git-clone
+        kind: ClusterTask
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: revision
+          value: $(params.git-revision)
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+          
+    - name: build-image
+      taskRef:
+        name: buildah
+        kind: ClusterTask
+      params:
+        - name: IMAGE
+          value: $(params.image-name)
+        - name: DOCKERFILE
+          value: ./Dockerfile
+        - name: CONTEXT
+          value: .
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      runAfter:
+        - git-clone
+          
+    - name: deploy
+      taskRef:
+        name: openshift-client
+        kind: ClusterTask
+      params:
+        - name: SCRIPT
+          value: |
+            oc apply -f openshift/deployment.yaml
+            oc apply -f openshift/service.yaml
+            oc apply -f openshift/route.yaml
+      workspaces:
+        - name: manifest-dir
+          workspace: shared-workspace
+      runAfter:
+        - build-image

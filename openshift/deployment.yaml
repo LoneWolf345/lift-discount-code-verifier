@@ -1,0 +1,76 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discount-code-verifier-uat
+  labels:
+    app: discount-code-verifier
+    environment: uat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discount-code-verifier
+      environment: uat
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: discount-code-verifier
+        environment: uat
+      annotations:
+        openshift.io/scc: nonroot-v2
+    spec:
+      securityContext:
+        fsGroup: 0
+        supplementalGroups: [1002290000]
+        seLinuxOptions:
+          level: s0:c48,c17
+      containers:
+        - name: discount-code-verifier
+          image: image-registry.openshift-image-registry.svc:5000/discount-code-verifier-uat/discount-code-verifier:latest
+          imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1002290000
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "8080"
+            - name: HOME
+              value: /opt/app-root/home
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 3
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+            periodSeconds: 10
+            failureThreshold: 3

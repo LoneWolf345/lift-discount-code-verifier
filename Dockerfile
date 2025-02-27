@@ -50,13 +50,19 @@ RUN apk --no-cache add curl
 RUN chown -R 1002290000:0 /opt/app-root && \
     chmod -R g=u /opt/app-root
 
+# Drop capabilities to comply with OpenShift security requirements
+# Annotations for OpenShift to configure MCS labels and supplemental groups
+# are handled at the deployment level
+
 # Switch to unprivileged user (OpenShift will assign the appropriate UID)
 USER 1002290000
 
 # OpenShift-specific labels
 LABEL io.openshift.expose-services="8080:http" \
-      io.k8s.description="Vite React application" \
-      io.openshift.tags="nodejs,vite,react"
+      io.k8s.description="Vite React application for discount code verification" \
+      io.openshift.tags="nodejs,vite,react" \
+      io.openshift.non-scalable="false" \
+      io.k8s.display-name="discount-code-verifier-uat"
 
 # Expose port
 EXPOSE 8080
