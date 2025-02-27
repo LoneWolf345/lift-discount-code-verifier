@@ -27,7 +27,8 @@ export default defineConfig({
     cors: true,
     allowedHosts: [
       '697be092-4603-4d66-a348-5098640004d6.lovableproject.com',
-      'lift-discount-code-verifier-discount-code-verifier-uat.apps.uat-ocp4.uat.corp.cableone.net'
+      'lift-discount-code-verifier-discount-code-verifier-uat.apps.uat-ocp4.uat.corp.cableone.net',
+      'lift-discount-code-verifier.discount-code-verifier-uat.svc.cluster.local'
     ]
   },
   preview: {
@@ -36,7 +37,8 @@ export default defineConfig({
     cors: true,
     allowedHosts: [
       '697be092-4603-4d66-a348-5098640004d6.lovableproject.com',
-      'lift-discount-code-verifier-discount-code-verifier-uat.apps.uat-ocp4.uat.corp.cableone.net'
+      'lift-discount-code-verifier-discount-code-verifier-uat.apps.uat-ocp4.uat.corp.cableone.net',
+      'lift-discount-code-verifier.discount-code-verifier-uat.svc.cluster.local'
     ]
   },
   build: {
