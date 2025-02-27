@@ -44,6 +44,11 @@ spec:
             - containerPort: 8080
               name: http
               protocol: TCP
+          volumeMounts:
+            - name: npm-cache
+              mountPath: /opt/app-root/home/.npm
+            - name: tmp-volume
+              mountPath: /tmp
           env:
             - name: NODE_ENV
               value: production
@@ -60,11 +65,18 @@ spec:
             requests:
               cpu: "200m"
               memory: "256Mi"
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8080
+            failureThreshold: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
           livenessProbe:
             httpGet:
               path: /
               port: 8080
-            initialDelaySeconds: 10
+            initialDelaySeconds: 60
             timeoutSeconds: 3
             periodSeconds: 30
             failureThreshold: 3
@@ -72,7 +84,12 @@ spec:
             httpGet:
               path: /
               port: 8080
-            initialDelaySeconds: 5
+            initialDelaySeconds: 10
             timeoutSeconds: 3
             periodSeconds: 10
             failureThreshold: 3
+      volumes:
+        - name: npm-cache
+          emptyDir: {}
+        - name: tmp-volume
+          emptyDir: {}

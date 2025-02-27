@@ -23,9 +23,11 @@ FROM node:20.11-alpine3.19 AS production
 # Create OpenShift-compatible directory structure and npm cache directory
 RUN mkdir -p /opt/app-root/src \
     /opt/app-root/home \
-    /opt/app-root/home/.npm && \
+    /opt/app-root/home/.npm \
+    /tmp && \
     chmod -R 775 /opt/app-root && \
-    chmod -R 775 /opt/app-root/home/.npm
+    chmod -R 775 /opt/app-root/home/.npm && \
+    chmod -R 775 /tmp
 
 WORKDIR /opt/app-root/src
 
@@ -33,7 +35,8 @@ WORKDIR /opt/app-root/src
 ENV HOME=/opt/app-root/home \
     NODE_ENV=production \
     PORT=8080 \
-    NPM_CONFIG_CACHE=/opt/app-root/home/.npm
+    NPM_CONFIG_CACHE=/opt/app-root/home/.npm \
+    NODE_OPTIONS="--max-old-space-size=384"
 
 # Copy package files and install production dependencies only
 COPY package*.json ./
@@ -53,7 +56,9 @@ RUN apk --no-cache add curl
 RUN chown -R 1002290000:0 /opt/app-root && \
     chmod -R g=u /opt/app-root && \
     chown -R 1002290000:0 /opt/app-root/home/.npm && \
-    chmod -R g=u /opt/app-root/home/.npm
+    chmod -R g=u /opt/app-root/home/.npm && \
+    chown -R 1002290000:0 /tmp && \
+    chmod -R g=u /tmp
 
 # Switch to unprivileged user (OpenShift will assign the appropriate UID)
 USER 1002290000

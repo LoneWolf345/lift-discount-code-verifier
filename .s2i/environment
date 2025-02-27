@@ -4,3 +4,4 @@ NPM_RUN=preview
 PORT=8080
 HOME=/opt/app-root/home
 NPM_CONFIG_CACHE=/opt/app-root/home/.npm
+NODE_OPTIONS="--max-old-space-size=384"
