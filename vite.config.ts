@@ -13,24 +13,27 @@ export default defineConfig({
   },
   server: {
     port: 8080,
-    host: true,
-    cors: true,
-    strictPort: true,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
-    }
+    host: '0.0.0.0',
+    fs: {
+      strict: false,
+      allow: ['.']
+    },
+    hmr: {
+      clientPort: 8080
+    },
+    watch: {
+      usePolling: true
+    },
+    cors: true
   },
   preview: {
     port: 8080,
-    host: true,
-    cors: true,
-    strictPort: true,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
-    }
+    host: '0.0.0.0',
+    cors: true
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    chunkSizeWarningLimit: 1600
   }
 })
