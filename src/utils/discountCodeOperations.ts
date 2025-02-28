@@ -93,7 +93,7 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
       success: true,
       message,
       variant: "default",
-      className: "bg-primary text-primary-foreground"
+      className: "bg-success text-success-foreground"
     };
   } catch (error) {
     console.error('Unexpected error during verification:', error);
