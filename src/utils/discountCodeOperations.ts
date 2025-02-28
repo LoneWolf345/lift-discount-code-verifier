@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
@@ -6,6 +7,7 @@ interface VerificationResult {
   message: string;
   variant: "default" | "destructive";
   className?: string;
+  title?: string;
 }
 
 export const verifyDiscountCode = async (code: string): Promise<VerificationResult> => {
@@ -32,8 +34,9 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
       console.log('Code not found:', code);
       return {
         success: false,
-        message: "This discount code was not found",
-        variant: "destructive"
+        message: "The discount code you entered was not found. Please verify the code and try again.",
+        variant: "default",
+        title: "Code Not Found"
       };
     }
 

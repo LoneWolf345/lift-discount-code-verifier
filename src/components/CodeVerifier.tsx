@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,7 @@ const CodeVerifier = ({ codes }: CodeVerifierProps) => {
     const result = await verifyDiscountCode(code);
     
     toast({
-      title: result.success ? "Valid Code" : "Error",
+      title: result.title || (result.success ? "Valid Code" : "Error"),
       description: result.message,
       variant: result.variant,
       className: result.className,
