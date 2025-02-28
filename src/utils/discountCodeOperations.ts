@@ -36,7 +36,8 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
         success: false,
         message: "The discount code you entered was not found. Please verify the code and try again.",
         variant: "default",
-        title: "Code Not Found"
+        title: "Code Not Found",
+        className: "bg-primary text-primary-foreground"
       };
     }
 
@@ -92,7 +93,7 @@ export const verifyDiscountCode = async (code: string): Promise<VerificationResu
       success: true,
       message,
       variant: "default",
-      className: "bg-success text-success-foreground"
+      className: "bg-primary text-primary-foreground"
     };
   } catch (error) {
     console.error('Unexpected error during verification:', error);
