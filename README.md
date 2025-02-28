@@ -1,3 +1,4 @@
+
 # Welcome to your Lovable project
 
 ## Project info
@@ -62,8 +63,90 @@ This project is built with .
 
 ## How can I deploy this project?
 
+### Standard Web Deployment
+
 Simply open [Lovable](https://lovable.dev/projects/697be092-4603-4d66-a348-5098640004d6) and click on Share -> Publish.
 
 ## I want to use a custom domain - is that possible?
 
 We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+
+## OpenShift Deployment
+
+### Prerequisites
+- Access to OpenShift cluster with Tekton Pipelines 1.17.0
+- Appropriate permissions to create resources in the project namespace
+- OpenShift CLI (oc) installed
+
+### Repository
+The project repository is available at: https://github.com/LoneWolf345/lift-discount-code-verifier
+
+### Deployment Methods
+
+#### Method 1: Using OpenShift Pipelines (Recommended)
+1. Create the project:
+   ```bash
+   oc new-project discount-code-verifier-uat
+   ```
+2. Apply pipeline resources:
+   ```bash
+   oc apply -f openshift/pipeline/pipeline-pvc.yaml
+   oc apply -f openshift/pipeline/pipeline.yaml
+   ```
+3. Start pipeline:
+   ```bash
+   oc create -f openshift/pipeline/pipeline-run.yaml
+   ```
+
+#### Method 2: Manual Deployment
+Apply configurations directly:
+```bash
+oc apply -f openshift/deployment.yaml
+oc apply -f openshift/service.yaml
+oc apply -f openshift/route.yaml
+oc apply -f openshift/network-policy.yaml
+```
+
+### Critical Environment Variables
+The following environment variables must be configured in your deployment:
+```yaml
+- name: NODE_ENV
+  value: production
+- name: PORT
+  value: "8080"
+- name: HOME
+  value: /opt/app-root/home
+- name: NPM_CONFIG_CACHE
+  value: /opt/app-root/home/.npm
+- name: NODE_OPTIONS
+  value: "--max-old-space-size=384"
+- name: NPM_RUN
+  value: build
+```
+
+### Security Context Requirements
+- UID Range: 1002290000-1002300000
+- MCS Labels: s0:c48,c17
+- Supplemental Groups: 1002290000/10000
+- Security Context Constraint: nonroot-v2
+
+### Resource Limits
+Container resource limits:
+- CPU Request: 200m
+- CPU Limit: 500m
+- Memory Request: 256Mi
+- Memory Limit: 512Mi
+
+### Health Checks
+The application includes:
+- Liveness probe: HTTP GET / on port 8080
+- Readiness probe: HTTP GET / on port 8080
+
+### Troubleshooting
+Common issues and solutions:
+1. If the pod fails to start, verify environment variables are properly set
+2. Check security context constraints are properly applied
+3. Ensure resource limits are appropriate for your environment
+4. Verify pipeline permissions if using Method 1
+
+For detailed deployment configuration, refer to the files in the `openshift/` directory.
