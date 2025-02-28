@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CsvUploader from '@/components/CsvUploader';
@@ -44,7 +45,7 @@ const Index = () => {
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <span className="text-brand-purple font-bold text-lg">Sparklight</span>
+            <span className="text-3xl font-extrabold bg-gradient-to-r from-blue-400 to-blue-800 bg-clip-text text-transparent tracking-tight">Lift</span>
             <h1 className="text-4xl font-bold text-brand-black mt-2 mb-4">
               Discount Code Verifier
             </h1>
