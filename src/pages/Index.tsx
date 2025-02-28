@@ -45,7 +45,7 @@ const Index = () => {
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <span className="text-6xl font-effra bg-gradient-to-tr from-[#0197d9] to-[#52b5d4] bg-clip-text text-transparent tracking-tight">Lift</span>
+            <span className="text-6xl font-effra bg-gradient-to-tr from-[#0197d9] to-[#52b5d4] bg-clip-text text-transparent tracking-tight">lift</span>
             <h1 className="text-4xl font-bold text-brand-black mt-2 mb-4">
               Discount Code Verifier
             </h1>
